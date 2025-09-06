@@ -12,7 +12,9 @@ export default function ConfigValues() {
 
   const papeles = useSelector((state) => state.papeles.papeles); // array de papeles
   const valorM2Redux = useSelector((state) => state.valorM2.valorPorM2);
-  const valorLineaRedux = useSelector((state) => state.valorLinea.valorPorLinea);
+  const valorLineaRedux = useSelector((state) => state.valorLinea.valorLinea);
+  console.log("valorLineaRedux", valorLineaRedux);
+  
 
   // Estado local para inputs
   const [tipoSeleccionado, setTipoSeleccionado] = useState(null);

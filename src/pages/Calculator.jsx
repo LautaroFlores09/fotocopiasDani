@@ -48,6 +48,8 @@ export default function Calculator({ setSection }) {
     largo: Yup.number()
       .typeError("Debe ser un número")
       .positive("Mayor a 0")
+      .min(1, "Mínimo 1")
+      .max(90, "Máximo 90")
       .required("Requerido"),
     papel: Yup.string().required("Seleccione un papel"),
     tinta: Yup.number()
@@ -181,7 +183,7 @@ export default function Calculator({ setSection }) {
                     }}
                   >
                     <TextField
-                      label="Alto"
+                      label="Alto (CM)"
                       name="alto"
                       type="number"
                       value={values.alto}
@@ -193,7 +195,7 @@ export default function Calculator({ setSection }) {
                       fullWidth
                     />
                     <TextField
-                      label="Largo"
+                      label="Ancho (CM)"
                       name="largo"
                       type="number"
                       value={values.largo}
