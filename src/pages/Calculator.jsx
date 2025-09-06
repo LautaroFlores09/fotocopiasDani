@@ -11,9 +11,12 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  IconButton,
 } from "@mui/material";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
+import { fCurrency } from "../utils/format";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 export default function Calculator({ setSection }) {
   const papeles = useSelector((state) => state.papeles.papeles);
@@ -24,14 +27,15 @@ export default function Calculator({ setSection }) {
   const [canRender, setCanRender] = useState(false);
   const [valorPapel, setValorPapel] = useState("");
   const [total, setTotal] = useState(0);
-  const [valorPorM2Local, setValorPorM2Local] = useState(valorPorM2);
+  const [valorPorM2Local, setValorPorM2Local] = useState(0);
+  const [valorPapelLocal, setValorPapelLocal] = useState(0);
 
   useEffect(() => {
     if (!papeles.length || !valorPorM2 || !valorLinea) {
       setOpenDialog(true);
       setCanRender(false);
     } else {
-      setValorPorM2Local(valorPorM2);
+      setValorPorM2Local(0);
       setCanRender(true);
     }
   }, [papeles, valorPorM2, valorLinea]);
@@ -79,7 +83,44 @@ export default function Calculator({ setSection }) {
     const costoPapel = (supEnCM2 * papelM2) / CM2_POR_M2;
     const costoTinta = (supEnCM2 * tintaM2 * porcentajeTinta) / CM2_POR_M2;
 
-    setTotal(costoPapel + costoTinta);
+    setTotal(Math.round((costoPapel + costoTinta) * 100) / 100);
+  };
+
+  const handleChangeValores = (e, setFieldValue, values) => {
+    const { name, value } = e.target;
+
+    // Actualizamos Formik
+    setFieldValue(name, value);
+
+    // Convertimos alto, largo y tinta a número, tomando el valor que cambió
+    const altoNum = Number(name === "alto" ? value : values.alto) || 0;
+    const largoNum = Number(name === "largo" ? value : values.largo) || 0;
+    const tintaNum = Number(name === "tinta" ? value : values.tinta) || 0;
+
+    // Determinar valor del papel
+    let papelValor = valorPapel;
+    if (name === "papel") {
+      const papelSeleccionado = papeles.find((p) => p.tipoPapel === value);
+      papelValor = papelSeleccionado ? papelSeleccionado.valor : 0;
+      setValorPapel(papelValor);
+    }
+
+    // Calcular costo del papel
+    const CM2_POR_M2 = 10000;
+    const costoPapel =
+      Math.round(((altoNum * largoNum * papelValor) / CM2_POR_M2) * 100) / 100;
+    setValorPapelLocal(costoPapel);
+
+    // Calcular costo de tinta
+    const esLinea = tintaNum === 0;
+    const valorUnitario = esLinea ? valorLinea : valorPorM2;
+    const porcentajeTinta = esLinea ? 1 : tintaNum / 100;
+    const costoTinta =
+      Math.round(
+        ((altoNum * largoNum * valorUnitario * porcentajeTinta) / CM2_POR_M2) *
+          100
+      ) / 100;
+    setValorPorM2Local(costoTinta);
   };
 
   return (
@@ -124,11 +165,11 @@ export default function Calculator({ setSection }) {
             </Typography>
 
             <Formik
-              initialValues={{ alto: "", largo: "", papel: "", tinta: "100" }}
+              initialValues={{ alto: "", largo: "", papel: "", tinta: "" }}
               validationSchema={validationSchema}
               onSubmit={(values) => calcularTotal(values)}
             >
-              {({ values, errors, touched, handleChange, setFieldValue }) => (
+              {({ values, errors, touched, setFieldValue, resetForm }) => (
                 <Form>
                   {/* Alto y Largo */}
                   <Box
@@ -144,7 +185,9 @@ export default function Calculator({ setSection }) {
                       name="alto"
                       type="number"
                       value={values.alto}
-                      onChange={handleChange}
+                      onChange={(e) =>
+                        handleChangeValores(e, setFieldValue, values)
+                      }
                       error={touched.alto && Boolean(errors.alto)}
                       helperText={touched.alto && errors.alto}
                       fullWidth
@@ -154,7 +197,9 @@ export default function Calculator({ setSection }) {
                       name="largo"
                       type="number"
                       value={values.largo}
-                      onChange={handleChange}
+                      onChange={(e) =>
+                        handleChangeValores(e, setFieldValue, values)
+                      }
                       error={touched.largo && Boolean(errors.largo)}
                       helperText={touched.largo && errors.largo}
                       fullWidth
@@ -175,26 +220,22 @@ export default function Calculator({ setSection }) {
                       label="Papel"
                       name="papel"
                       value={values.papel}
-                      onChange={(e) => {
-                        handleChange(e);
-                        const p = papeles.find(
-                          (p) => p.tipoPapel === e.target.value
-                        );
-                        setValorPapel(p ? p.valor : 0);
-                      }}
+                      onChange={(e) =>
+                        handleChangeValores(e, setFieldValue, values)
+                      }
                       error={touched.papel && Boolean(errors.papel)}
                       helperText={touched.papel && errors.papel}
                       fullWidth
                     >
                       {papeles.map((p) => (
                         <MenuItem key={p.tipoPapel} value={p.tipoPapel}>
-                          {p.tipoPapel}
+                          {`${p.tipoPapel}`}
                         </MenuItem>
                       ))}
                     </TextField>
                     <TextField
                       label="$"
-                      value={valorPapel}
+                      value={valorPapelLocal}
                       InputProps={{ readOnly: true }}
                       fullWidth
                     />
@@ -215,12 +256,7 @@ export default function Calculator({ setSection }) {
                       type="number"
                       value={values.tinta}
                       onChange={(e) => {
-                        setFieldValue("tinta", e.target.value);
-                        setValorPorM2Local(
-                          Number(e.target.value) === 0
-                            ? valorLinea
-                            : (valorPorM2 * Number(e.target.value)) / 100
-                        );
+                        handleChangeValores(e, setFieldValue, values);
                       }}
                       error={touched.tinta && Boolean(errors.tinta)}
                       helperText={touched.tinta && errors.tinta}
@@ -239,25 +275,71 @@ export default function Calculator({ setSection }) {
                     sx={{
                       display: "flex",
                       flexDirection: { xs: "column", sm: "row" },
+                      justifyContent: { xs: "center", sm: "space-between" },
                       alignItems: "center",
                       gap: 2,
                       mb: 4,
+                      p: 2,
+                      bgcolor: "background.paper", // fondo según tu theme
+                      borderRadius: 2,
                     }}
                   >
-                    <Typography variant="h6" sx={{ minWidth: { sm: 100 } }}>
+                    <Typography
+                      variant="h6"
+                      sx={{
+                        minWidth: { sm: 100 },
+                        textAlign: { xs: "center", sm: "left" },
+                        color: "text.secondary", // label gris
+                      }}
+                    >
                       TOTAL
                     </Typography>
-                    <TextField
-                      value={total}
-                      InputProps={{ readOnly: true }}
-                      fullWidth
-                    />
+                    <Typography
+                      variant="h4"
+                      sx={{
+                        color: "primary.main", // resalta con cian
+                        fontWeight: "bold",
+                        textAlign: { xs: "center", sm: "right" },
+                      }}
+                    >
+                      {fCurrency(total)}
+                    </Typography>
                   </Box>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 2,
+                      mt: 2,
+                    }}
+                  >
+                    {/* Botón centrado */}
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "center",
+                        flexGrow: 1,
+                      }}
+                    >
+                      <Button variant="contained" type="submit" sx={{ px: 6 }}>
+                        Calcular
+                      </Button>
+                    </Box>
 
-                  <Box sx={{ display: "flex", justifyContent: "center" }}>
-                    <Button variant="contained" type="submit" sx={{ px: 6 }}>
-                      Calcular
-                    </Button>
+                    {/* IconButton al final */}
+                    <IconButton
+                      onClick={() => {
+                        resetForm();
+                        setValorPapelLocal("");
+                        setValorPorM2Local("");
+                        setTotal(0);
+                      }}
+                      color="secondary"
+                      aria-label="delete"
+                      sx={{ ml: "auto" }}
+                    >
+                      <DeleteIcon />
+                    </IconButton>
                   </Box>
                 </Form>
               )}

@@ -17,8 +17,9 @@ import { SnackbarProvider } from "notistack";
 import Calculator from "./pages/Calculator";
 import Configuraciones from "./pages/Configuraciones";
 import LayersIcon from "@mui/icons-material/Layers";
-import CalculateIcon from '@mui/icons-material/Calculate';
+import CalculateIcon from "@mui/icons-material/Calculate";
 import SettingsIcon from "@mui/icons-material/Settings";
+import Footer from "./components/Footer";
 
 const drawerWidth = 240;
 
@@ -46,7 +47,6 @@ function App() {
       }}
     >
       <Box sx={{ display: "flex" }}>
-
         <Drawer
           variant="permanent"
           sx={{
@@ -74,20 +74,25 @@ function App() {
             }}
           >
             <LayersIcon sx={{ fontSize: 40, color: "#00BCD4", mb: 1 }} />
-            <Typography
-              variant="h6"
-            >
-              Fotocopias Dani
-            </Typography>
+            <Typography variant="h6">Fotocopias Dani</Typography>
           </Box>
 
           <Divider />
 
+          {/* Lista de secciones */}
           <Box sx={{ overflowY: "auto", flexGrow: 1, mt: 1 }}>
             <List>
               {[
-                { label: "Calculadora", key: "calculadora", icon: <CalculateIcon /> },
-                { label: "Configuraciones", key: "configuraciones", icon: <SettingsIcon /> },
+                {
+                  label: "Calculadora",
+                  key: "calculadora",
+                  icon: <CalculateIcon />,
+                },
+                {
+                  label: "Configuraciones",
+                  key: "configuraciones",
+                  icon: <SettingsIcon />,
+                },
               ].map((item) => (
                 <ListItem key={item.key} disablePadding>
                   <ListItemButton
@@ -106,7 +111,8 @@ function App() {
                   >
                     <ListItemIcon
                       sx={{
-                        color: section === item.key ? "#00BCD4" : "text.primary",
+                        color:
+                          section === item.key ? "#00BCD4" : "text.primary",
                         minWidth: 36,
                       }}
                     >
@@ -123,6 +129,11 @@ function App() {
               ))}
             </List>
           </Box>
+
+          {/* Footer pegado abajo */}
+          <Box >
+            <Footer />
+          </Box>
         </Drawer>
 
         {/* Contenido principal */}
@@ -134,7 +145,7 @@ function App() {
             p: 3,
           }}
         >
-          {renderContent()}
+          <>{renderContent()}</>
         </Box>
       </Box>
     </SnackbarProvider>
