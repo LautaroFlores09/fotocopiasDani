@@ -46,8 +46,7 @@ function App() {
       }}
     >
       <Box sx={{ display: "flex" }}>
-        <CssBaseline />
-        {/* Sidebar / Drawer */}
+
         <Drawer
           variant="permanent"
           sx={{
@@ -65,7 +64,7 @@ function App() {
           }}
         >
           {/* Título con icono */}
-          <Toolbar
+          <Box
             sx={{
               display: "flex",
               alignItems: "center",
@@ -80,7 +79,7 @@ function App() {
             >
               Fotocopias Dani
             </Typography>
-          </Toolbar>
+          </Box>
 
           <Divider />
 
@@ -133,10 +132,8 @@ function App() {
             flexGrow: 1,
             bgcolor: "background.default",
             p: 3,
-            minHeight: "100vh",
           }}
         >
-          <Toolbar />
           {renderContent()}
         </Box>
       </Box>

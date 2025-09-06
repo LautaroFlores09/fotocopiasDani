@@ -53,36 +53,34 @@ export default function Calculator({ setSection }) {
       .required("Requerido"),
   });
 
-
   const calcularTotal = (values) => {
-  const { alto, largo, tinta } = values;
+    const { alto, largo, tinta } = values;
 
-  // Convertimos a número una sola vez
-  const altoNum = Number(alto) || 0;
-  const largoNum = Number(largo) || 0;
-  const tintaNum = Number(tinta) || 0;
+    // Convertimos a número una sola vez
+    const altoNum = Number(alto) || 0;
+    const largoNum = Number(largo) || 0;
+    const tintaNum = Number(tinta) || 0;
 
-  // Constantes claras
-  const CM2_POR_M2 = 10000;
-  const papelM2 = Number(valorPapel) || 0;
-  const valorLineaNum = Number(valorLinea) || 0;
-  const valorPorM2Num = Number(valorPorM2) || 0;
+    // Constantes claras
+    const CM2_POR_M2 = 10000;
+    const papelM2 = Number(valorPapel) || 0;
+    const valorLineaNum = Number(valorLinea) || 0;
+    const valorPorM2Num = Number(valorPorM2) || 0;
 
-  // Superficie total
-  const supEnCM2 = altoNum * largoNum;
+    // Superficie total
+    const supEnCM2 = altoNum * largoNum;
 
-  // Cálculo de tinta
-  const esLinea = tintaNum === 0;
-  const porcentajeTinta = esLinea ? 1 : tintaNum / 100;
-  const tintaM2 = esLinea ? valorLineaNum : valorPorM2Num;
+    // Cálculo de tinta
+    const esLinea = tintaNum === 0;
+    const porcentajeTinta = esLinea ? 1 : tintaNum / 100;
+    const tintaM2 = esLinea ? valorLineaNum : valorPorM2Num;
 
-  // Costos
-  const costoPapel = (supEnCM2 * papelM2) / CM2_POR_M2;
-  const costoTinta = (supEnCM2 * tintaM2 * porcentajeTinta) / CM2_POR_M2;
+    // Costos
+    const costoPapel = (supEnCM2 * papelM2) / CM2_POR_M2;
+    const costoTinta = (supEnCM2 * tintaM2 * porcentajeTinta) / CM2_POR_M2;
 
-  setTotal(costoPapel + costoTinta);
-};
-
+    setTotal(costoPapel + costoTinta);
+  };
 
   return (
     <>
@@ -105,7 +103,6 @@ export default function Calculator({ setSection }) {
       {canRender && (
         <Box
           sx={{
-            minHeight: "100vh",
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
